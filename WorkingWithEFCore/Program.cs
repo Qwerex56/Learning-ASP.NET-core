@@ -4,18 +4,77 @@ using Packt.Shared;
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine($"Using {ProjectConstants.DataBaseProvider}");
 
-static void QueryingCategories() {
-  using (Northwind db = new()) {
+static void QueryingCategories()
+{
+  using (Northwind db = new())
+  {
     Console.WriteLine("Categories and how many products they have:");
     IQueryable<Category>? categories = db.Categories?.Include(c => c.Products);
 
-    if ((categories is null) || (!categories.Any())) {
+    if ((categories is null) || (!categories.Any()))
+    {
       return;
     }
-     foreach (var c in categories) {
+    foreach (var c in categories)
+    {
       Console.WriteLine($"{c.CategoryName} has {c.Products.Count} products.");
     }
   }
 }
 
-QueryingCategories();
+static void FilteredIncludes()
+{
+  using (Northwind db = new())
+  {
+    Console.Write("Enter a minimum for units in stock: ");
+    string unitsInStock = Console.ReadLine() ?? "10";
+    int stock = int.Parse(unitsInStock);
+    IQueryable<Category>? categories = db.Categories?.Include(c => c.Products.Where(p => p.Stock >= stock));
+
+    if (categories is null)
+    {
+      return;
+    }
+
+    Console.WriteLine($"To query string: {categories.ToQueryString()}");
+    foreach (var c in categories)
+    {
+      Console.WriteLine($"{c.CategoryName} has {c.Products.Count} products with a minimum of {stock} units in stock.");
+      foreach (var p in c.Products)
+      {
+        Console.WriteLine($"  {p.ProductName} has {p.Stock} units in stock.");
+      }
+    }
+  }
+}
+static void QueryfingProducts()
+{
+  using (Northwind db = new())
+  {
+    string? input;
+    decimal price;
+    do
+    {
+      Console.Write("Enter product price: ");
+      input = Console.ReadLine();
+    } while (!decimal.TryParse(input, out price));
+
+    IQueryable<Product>? products = db.Products?.Where(product => product.Cost > price)
+      .OrderByDescending(product => product.Cost);
+
+    if (products is null)
+    {
+      return;
+    }
+    foreach (var p in products)
+    {
+      Console.WriteLine(
+        "{0}: {1} costs {2:$#,##0.00} and has {3} in stock.",
+        p.ProductId, p.ProductName, p.Cost, p.Stock);
+    }
+  }
+}
+
+// QueryingCategories();
+FilteredIncludes();
+// QueryfingProducts();
