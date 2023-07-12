@@ -69,7 +69,9 @@ static void QueryfingProducts()
     } while (!decimal.TryParse(input, out price));
 
     // Equivalent of SELECT from SQL database
-    IQueryable<Product>? products = db.Products?.Where(product => product.Cost > price)
+    IQueryable<Product>? products = db.Products?
+      .TagWith("Products filtereed by price and sorted")
+      .Where(product => product.Cost > price)
       .OrderByDescending(product => product.Cost);
 
     if (products is null)
