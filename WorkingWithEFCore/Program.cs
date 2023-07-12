@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Packt.Shared;
 
 // See https://aka.ms/new-console-template for more information
@@ -8,6 +11,9 @@ static void QueryingCategories()
 {
   using (Northwind db = new())
   {
+    ILoggerFactory loggerFactory = db.GetService<ILoggerFactory>();
+    loggerFactory.AddProvider(new ConsoleLoggerProvider());
+
     Console.WriteLine("Categories and how many products they have:");
     IQueryable<Category>? categories = db.Categories?.Include(c => c.Products);
 
@@ -51,6 +57,9 @@ static void QueryfingProducts()
 {
   using (Northwind db = new())
   {
+    ILoggerFactory loggerFactory = db.GetService<ILoggerFactory>();
+    loggerFactory.AddProvider(new ConsoleLoggerProvider());
+
     string? input;
     decimal price;
     do
@@ -59,6 +68,7 @@ static void QueryfingProducts()
       input = Console.ReadLine();
     } while (!decimal.TryParse(input, out price));
 
+    // Equivalent of SELECT from SQL database
     IQueryable<Product>? products = db.Products?.Where(product => product.Cost > price)
       .OrderByDescending(product => product.Cost);
 
@@ -75,6 +85,6 @@ static void QueryfingProducts()
   }
 }
 
-// QueryingCategories();
-FilteredIncludes();
+QueryingCategories();
+// FilteredIncludes();
 // QueryfingProducts();
