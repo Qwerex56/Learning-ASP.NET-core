@@ -19,18 +19,20 @@ static void QueryingCategories()
     IQueryable<Category>? categories = db.Categories; // ?.Include(c => c.Products);
 
     db.ChangeTracker.LazyLoadingEnabled = false;
-    
+
     Console.Write("Enable eager loading? ");
-    
+
     bool eagerLoading = (Console.ReadKey().Key == ConsoleKey.Y);
     bool explicitLoading = false;
-    
+
     Console.WriteLine();
 
-    if (eagerLoading) {
+    if (eagerLoading)
+    {
       categories = db.Categories?.Include(c => c.Products);
     }
-    else {
+    else
+    {
       categories = db.Categories;
       Console.Write("Enable explicit loading? ");
       explicitLoading = (Console.ReadKey().Key == ConsoleKey.Y);
@@ -47,8 +49,9 @@ static void QueryingCategories()
       ConsoleKeyInfo key = Console.ReadKey();
       Console.WriteLine();
 
-      if (key.Key == ConsoleKey.Y) {
-        CollectionEntry<Category, Product> products = 
+      if (key.Key == ConsoleKey.Y)
+      {
+        CollectionEntry<Category, Product> products =
           db.Entry(c).Collection(c2 => c2.Products);
         if (!products.IsLoaded) products.Load();
       }
@@ -129,18 +132,62 @@ static void QueryfyingWithLike()
     IQueryable<Product>? products = db.Products?
       .Where(p => EF.Functions.Like(p.ProductName, $"%{input}%"));
 
-    if (products is null) {
+    if (products is null)
+    {
       return;
     }
 
-    foreach (Product p in products) {
-      Console.WriteLine("{0} has {1} units in stock. Discontinued? {2}", 
+    foreach (Product p in products)
+    {
+      Console.WriteLine("{0} has {1} units in stock. Discontinued? {2}",
         p.ProductName, p.Stock, p.Discontinued);
     }
   }
 }
 
-QueryingCategories();
+static bool AddProduct(
+  int categoryId, string productName, decimal? price
+)
+{
+  using (Northwind db = new())
+  {
+    Product p = new()
+    {
+      CategoryId = categoryId,
+      ProductName = productName,
+      Cost = price,
+    };
+
+    db.Products.Add(p);
+
+    int affected = db.SaveChanges();
+    return affected == 1;
+  }
+}
+
+static void ListProducts()
+{
+  using (Northwind db = new())
+  {
+    Console.WriteLine("{0,-3} {1,-35} {2,8} {3,5} {4}",
+      "Id", "Product Name", "Cost", "Stock", "Disc.");
+    foreach (Product p in db.Products
+      .OrderByDescending(product => product.Cost))
+    {
+      Console.WriteLine("{0:000} {1,-35} {2,8:$#,##0.00} {3,5} {4}",
+        p.ProductId, p.ProductName, p.Cost, p.Stock, p.Discontinued);
+    }
+  }
+}
+
+// QueryingCategories();
 // FilteredIncludes();
 // QueryfingProducts();
 // QueryfyingWithLike();
+
+if (AddProduct(categoryId: 6, productName: "Bob's Burger", price: 500M))
+{
+  Console.WriteLine("Succesfully added");
+}
+
+ListProducts();
