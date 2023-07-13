@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,12 +18,40 @@ static void QueryingCategories()
     Console.WriteLine("Categories and how many products they have:");
     IQueryable<Category>? categories = db.Categories; // ?.Include(c => c.Products);
 
+    db.ChangeTracker.LazyLoadingEnabled = false;
+    
+    Console.Write("Enable eager loading? ");
+    
+    bool eagerLoading = (Console.ReadKey().Key == ConsoleKey.Y);
+    bool explicitLoading = false;
+    
+    Console.WriteLine();
+
+    if (eagerLoading) {
+      categories = db.Categories?.Include(c => c.Products);
+    }
+    else {
+      categories = db.Categories;
+      Console.Write("Enable explicit loading? ");
+      explicitLoading = (Console.ReadKey().Key == ConsoleKey.Y);
+      Console.WriteLine();
+    }
+
     if ((categories is null) || (!categories.Any()))
     {
       return;
     }
     foreach (var c in categories)
     {
+      Console.Write($"Explicitly load products for {c.CategoryName}? (Y/N): ");
+      ConsoleKeyInfo key = Console.ReadKey();
+      Console.WriteLine();
+
+      if (key.Key == ConsoleKey.Y) {
+        CollectionEntry<Category, Product> products = 
+          db.Entry(c).Collection(c2 => c2.Products);
+        if (!products.IsLoaded) products.Load();
+      }
       Console.WriteLine($"{c.CategoryName} has {c.Products.Count} products.");
     }
   }
