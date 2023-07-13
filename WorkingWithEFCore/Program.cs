@@ -87,6 +87,31 @@ static void QueryfingProducts()
   }
 }
 
-QueryingCategories();
+static void QueryfyingWithLike()
+{
+  using (Northwind db = new())
+  {
+    ILoggerFactory loggerFactory = db.GetService<ILoggerFactory>();
+    loggerFactory.AddProvider(new ConsoleLoggerProvider());
+
+    Console.Write("Enter part of product name: ");
+    string? input = Console.ReadLine();
+
+    IQueryable<Product>? products = db.Products?
+      .Where(p => EF.Functions.Like(p.ProductName, $"%{input}%"));
+
+    if (products is null) {
+      return;
+    }
+
+    foreach (Product p in products) {
+      Console.WriteLine("{0} has {1} units in stock. Discontinued? {2}", 
+        p.ProductName, p.Stock, p.Discontinued);
+    }
+  }
+}
+
+// QueryingCategories();
 // FilteredIncludes();
 // QueryfingProducts();
+QueryfyingWithLike();
