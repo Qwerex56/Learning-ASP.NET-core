@@ -29,5 +29,9 @@ public class Northwind : DbContext
         .Property(product => product.Cost)
         .HasConversion<double>();
     }
+
+    // Global Filter
+    modelBuilder.Entity<Product>()
+      .HasQueryFilter(p => !p.Discontinued);
   }
 }
