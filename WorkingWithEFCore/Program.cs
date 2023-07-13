@@ -15,7 +15,7 @@ static void QueryingCategories()
     loggerFactory.AddProvider(new ConsoleLoggerProvider());
 
     Console.WriteLine("Categories and how many products they have:");
-    IQueryable<Category>? categories = db.Categories?.Include(c => c.Products);
+    IQueryable<Category>? categories = db.Categories; // ?.Include(c => c.Products);
 
     if ((categories is null) || (!categories.Any()))
     {
@@ -111,7 +111,7 @@ static void QueryfyingWithLike()
   }
 }
 
-// QueryingCategories();
+QueryingCategories();
 // FilteredIncludes();
 // QueryfingProducts();
-QueryfyingWithLike();
+// QueryfyingWithLike();
