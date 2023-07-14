@@ -252,7 +252,7 @@ static void ListProducts()
 //   Console.WriteLine("Succesfully deleted product");
 // }
 
-int deleted = DeleteProducts("Bob");
-Console.WriteLine($"{deleted} products were deleted");
+// int deleted = DeleteProducts("Bob");
+// Console.WriteLine($"{deleted} products were deleted");
 
 ListProducts();
