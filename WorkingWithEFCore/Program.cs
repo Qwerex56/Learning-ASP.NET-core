@@ -165,6 +165,59 @@ static bool AddProduct(
   }
 }
 
+static bool IncreaseProductPrice(string productNameStartWith, decimal amount)
+{
+  using (Northwind db = new())
+  {
+    Product updateProduct = db.Products.First(p => p.ProductName.StartsWith(productNameStartWith));
+    updateProduct.Cost += amount;
+    int affected = db.SaveChanges();
+    return affected == 1;
+  }
+}
+
+static bool DeleteProduct(string productNameStartWith)
+{
+  using (Northwind db = new())
+  {
+    Product productToDelete = db.Products.First(p => p.ProductName.StartsWith(productNameStartWith));
+    db.Remove(productToDelete);
+    int affected = db.SaveChanges();
+    return affected == 1;
+  }
+}
+
+static int DeleteProducts(string productNameStartWith)
+{
+  using (Northwind db = new())
+  {
+    IQueryable<Product>? productsToDelete = db.Products?.Where(p => p.ProductName.StartsWith(productNameStartWith));
+
+    if (productsToDelete is null)
+    {
+      Console.WriteLine("Nothing to delete");
+    }
+    else
+    {
+      db.RemoveRange(productsToDelete);
+    }
+
+    int affected = db.SaveChanges();
+    return affected;
+  }
+}
+
+static bool DeleteProductExactName(string exactProductName)
+{
+  using (Northwind db = new())
+  {
+    Product productToDelete = db.Products.First(p => p.ProductName == exactProductName);
+    db.Remove(productToDelete);
+    int affected = db.SaveChanges();
+    return affected == 1;
+  }
+}
+
 static void ListProducts()
 {
   using (Northwind db = new())
@@ -185,9 +238,21 @@ static void ListProducts()
 // QueryfingProducts();
 // QueryfyingWithLike();
 
-if (AddProduct(categoryId: 6, productName: "Bob's Burger", price: 500M))
-{
-  Console.WriteLine("Succesfully added");
-}
+// if (AddProduct(categoryId: 6, productName: "Bob's Burger", price: 500M))
+// {
+//   Console.WriteLine("Succesfully added");
+// }
+
+// if (IncreaseProductPrice(amount: 20M, productNameStartWith: "Bob")) {
+//   Console.WriteLine("Updated succesfully");
+// }
+
+// if (DeleteProduct("Bob"))
+// {
+//   Console.WriteLine("Succesfully deleted product");
+// }
+
+int deleted = DeleteProducts("Bob");
+Console.WriteLine($"{deleted} products were deleted");
 
 ListProducts();
